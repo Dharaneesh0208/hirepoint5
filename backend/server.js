@@ -1,32 +1,25 @@
 const express = require("express");
-
 const cors = require("cors");
+const dotenv = require("dotenv");
 
-const connectDB =
-require("./config/db");
+const connectDB = require("./config/db");
 
-const expertRoutes =
-require("./routes/expertRoutes");
-
-const userRoutes =
-require("./routes/userRoutes");
-
-const app = express();
+dotenv.config();
 
 connectDB();
 
-app.use(cors());
+const app = express();
 
+app.use(cors());
 app.use(express.json());
 
-app.use("/experts",
-expertRoutes);
+app.use("/api/auth", require("./routes/authRoutes"));
+app.use("/api/experts", require("./routes/expertRoutes"));
 
-app.use("/users",
-userRoutes);
+app.get("/", (req, res) => {
+  res.send("HirePoint API Running");
+});
 
-app.listen(5000,()=>{
-
-console.log("Server Running");
-
+app.listen(process.env.PORT, () => {
+  console.log("Server Running");
 });

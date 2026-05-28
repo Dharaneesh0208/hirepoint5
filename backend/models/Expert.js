@@ -1,27 +1,9 @@
 const mongoose = require("mongoose");
 
-const expertSchema =
-new mongoose.Schema({
-
-name:{
-type:String,
-required:true
-},
-
-skill:{
-type:String,
-required:true
-},
-
-location:{
-type:String,
-required:true
-}
-
+const expertSchema = new mongoose.Schema({
+  name: String,
+  skill: String,
+  location: String
 });
 
-module.exports =
-mongoose.model(
-"Expert",
-expertSchema
-);
+module.exports = mongoose.model("Expert", expertSchema);

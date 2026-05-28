@@ -1,444 +1,323 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 
 import "./App.css";
 
-import Navbar from "./components/Navbar";
-import Hero from "./components/Hero";
-import ExpertForm from "./components/ExpertForm";
-import ExpertList from "./components/ExpertList";
-import AuthModal from "./components/AuthModal";
-
 function App() {
 
-const [experts, setExperts] = useState([]);
-const [filtered, setFiltered] = useState([]);
+  const [experts, setExperts] = useState([]);
 
-const [name, setName] = useState("");
-const [skill, setSkill] = useState("");
-const [location, setLocation] = useState("");
+  const [name, setName] = useState("");
+  const [skill, setSkill] = useState("");
+  const [location, setLocation] = useState("");
 
-const [search, setSearch] = useState("");
+  const [search, setSearch] = useState("");
 
-const [editId, setEditId] = useState(null);
+  const [showLogin, setShowLogin] = useState(false);
+  const [showSignup, setShowSignup] = useState(false);
 
-const [showAuth, setShowAuth] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-const [type, setType] = useState("");
+  const API = "http://localhost:5000/api";
 
-const [email, setEmail] = useState("");
-const [password, setPassword] = useState("");
+  useEffect(() => {
+    fetchExperts();
+  }, []);
 
-/* FETCH EXPERTS */
+  const fetchExperts = async () => {
+    const res = await axios.get(`${API}/experts`);
+    setExperts(res.data);
+  };
 
-const fetchExperts = async () => {
+  const addExpert = async () => {
 
-try {
+    if (!name || !skill || !location) {
+      alert("Fill all fields");
+      return;
+    }
 
-const res = await axios.get(
-"http://localhost:5000/experts"
-);
+    await axios.post(`${API}/experts`, {
+      name,
+      skill,
+      location
+    });
 
-setExperts(res.data);
-setFiltered(res.data);
+    fetchExperts();
 
-} catch(error){
+    setName("");
+    setSkill("");
+    setLocation("");
+  };
 
-console.log(error);
+  const deleteExpert = async (id) => {
+    await axios.delete(`${API}/experts/${id}`);
+    fetchExperts();
+  };
 
-}
+  const signup = async () => {
 
-};
+    if (!email.includes("@")) {
+      alert("Invalid Email");
+      return;
+    }
 
-useEffect(() => {
-fetchExperts();
-}, []);
+    if (password.length < 6) {
+      alert("Password minimum 6 characters");
+      return;
+    }
 
-/* ADD OR UPDATE */
+    await axios.post(`${API}/auth/signup`, {
+      name,
+      email,
+      password
+    });
 
-const saveExpert = async () => {
+    alert("Signup Successful");
+    setShowSignup(false);
+  };
 
-if(!name || !skill || !location){
+  const login = async () => {
 
-alert("Fill all fields");
-return;
+    if (!email.includes("@")) {
+      alert("Invalid Email");
+      return;
+    }
 
-}
+    const res = await axios.post(`${API}/auth/login`, {
+      email,
+      password
+    });
 
-try {
+    localStorage.setItem("token", res.data.token);
 
-if(editId){
+    alert("Login Successful");
 
-await axios.put(
+    setShowLogin(false);
+  };
 
-`http://localhost:5000/experts/${editId}`,
+  const filteredExperts = experts.filter((e) =>
+    e.location.toLowerCase().includes(search.toLowerCase())
+  );
 
-{
-name,
-skill,
-location
-},
+  return (
+    <div className="app">
 
-{
-headers:{
-Authorization:
-`Bearer ${localStorage.getItem("token")}`
-}
-}
+      <header>
 
-);
+        <h1>HirePoint</h1>
 
-alert("Expert Updated");
+        <nav>
+          <a href="#home">Home</a>
+          <a href="#about">About</a>
+          <a href="#features">Features</a>
+          <a href="#footer">Contact</a>
+        </nav>
 
-setEditId(null);
+        <div>
+          <button
+            className="loginBtn"
+            onClick={() => setShowLogin(true)}
+          >
+            Login
+          </button>
 
-}else{
+          <button
+            className="signupBtn"
+            onClick={() => setShowSignup(true)}
+          >
+            Signup
+          </button>
+        </div>
 
-await axios.post(
+      </header>
 
-"http://localhost:5000/experts",
+      <section className="hero" id="home">
 
-{
-name,
-skill,
-location
-},
+        <h2>Find Skilled Experts Near You</h2>
 
-{
-headers:{
-Authorization:
-`Bearer ${localStorage.getItem("token")}`
-}
-}
+        <p>
+          HirePoint connects clients with talented
+          professionals quickly and securely.
+        </p>
 
-);
+      </section>
 
-alert("Expert Added");
+      <section className="about" id="about">
 
-}
+        <h2>About HirePoint</h2>
 
-setName("");
-setSkill("");
-setLocation("");
+        <p>
+          HirePoint is a smart freelance hiring platform
+          for finding developers, editors, designers and more.
+        </p>
 
-fetchExperts();
+      </section>
 
-}catch(error){
+      <section className="features" id="features">
 
-alert("Login Required");
+        <h2>Features</h2>
 
-}
+        <div className="cards">
 
-};
+          <div className="card">
+            <h3>Smart Search</h3>
+          </div>
 
-/* DELETE */
+          <div className="card">
+            <h3>Secure Hiring</h3>
+          </div>
 
-const deleteExpert = async(id)=>{
+          <div className="card">
+            <h3>Live Chat</h3>
+          </div>
 
-try{
+          <div className="card">
+            <h3>Project Tracking</h3>
+          </div>
 
-await axios.delete(
+        </div>
 
-`http://localhost:5000/experts/${id}`,
+      </section>
 
-{
-headers:{
-Authorization:
-`Bearer ${localStorage.getItem("token")}`
-}
-}
+      <section className="expertSection">
 
-);
+        <h2>Add Expert</h2>
 
-alert("Expert Deleted");
+        <input
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
 
-fetchExperts();
+        <input
+          placeholder="Skill"
+          value={skill}
+          onChange={(e) => setSkill(e.target.value)}
+        />
 
-}catch(error){
+        <input
+          placeholder="Location"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+        />
 
-alert("Login Required");
+        <button onClick={addExpert}>
+          Add Expert
+        </button>
 
-}
+      </section>
 
-};
+      <section className="searchSection">
 
-/* EDIT */
+        <h2>Search Experts by Location</h2>
 
-const editExpert = (expert)=>{
+        <input
+          placeholder="Search Location"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
 
-setName(expert.name);
-setSkill(expert.skill);
-setLocation(expert.location);
+      </section>
 
-setEditId(expert._id);
+      <section className="expertList">
 
-};
+        {
+          filteredExperts.length === 0
+          ? <p>No Experts Found</p>
+          : filteredExperts.map((e) => (
 
-/* SEARCH */
+            <div className="expertCard" key={e._id}>
 
-const searchExpert = ()=>{
+              <h3>{e.name}</h3>
 
-const result = experts.filter((e)=>
+              <p>{e.skill}</p>
 
-e.location
-.toLowerCase()
-.includes(
-search.toLowerCase()
-)
+              <p>{e.location}</p>
 
-);
+              <button onClick={() => deleteExpert(e._id)}>
+                Delete
+              </button>
 
-setFiltered(result);
+            </div>
+          ))
+        }
 
-};
+      </section>
 
-/* LOGIN */
+      {
+        showLogin && (
+          <div className="modal">
 
-const openLogin = ()=>{
+            <div className="form">
 
-setType("Login");
-setShowAuth(true);
+              <h2>Login</h2>
 
-};
+              <input
+                placeholder="Email"
+                onChange={(e) => setEmail(e.target.value)}
+              />
 
-/* SIGNUP */
+              <input
+                type="password"
+                placeholder="Password"
+                onChange={(e) => setPassword(e.target.value)}
+              />
 
-const openSignup = ()=>{
+              <button onClick={login}>
+                Login
+              </button>
 
-setType("Signup");
-setShowAuth(true);
+            </div>
 
-};
+          </div>
+        )
+      }
 
-/* CLOSE */
+      {
+        showSignup && (
+          <div className="modal">
 
-const close = ()=>{
+            <div className="form">
 
-setShowAuth(false);
+              <h2>Signup</h2>
 
-};
+              <input
+                placeholder="Name"
+                onChange={(e) => setName(e.target.value)}
+              />
 
-/* VALIDATION */
+              <input
+                placeholder="Email"
+                onChange={(e) => setEmail(e.target.value)}
+              />
 
-const validate = async()=>{
+              <input
+                type="password"
+                placeholder="Password"
+                onChange={(e) => setPassword(e.target.value)}
+              />
 
-const regex =
-/\S+@\S+\.\S+/;
+              <button onClick={signup}>
+                Signup
+              </button>
 
-if(!regex.test(email)){
-alert("Invalid Email");
-return;
-}
+            </div>
 
-if(password.length < 6){
-alert("Password minimum 6");
-return;
-}
+          </div>
+        )
+      }
 
-try{
+      <footer id="footer">
 
-/* SIGNUP */
+        <h2>HirePoint</h2>
 
-if(type==="Signup"){
+        <p>Your Professional Hiring Platform</p>
 
-await axios.post(
-"http://localhost:5000/users/register",
-{
-email,
-password
-}
-);
+      </footer>
 
-alert("Signup Success");
-
-/* LOGIN */
-
-}else{
-
-const res = await axios.post(
-"http://localhost:5000/users/login",
-{
-email,
-password
-}
-);
-
-localStorage.setItem(
-"token",
-res.data.token
-);
-
-alert("Login Success");
-
-}
-
-close();
-
-}catch(error){
-
-alert("Invalid Credentials");
-
-}
-
-};
-
-return (
-
-<>
-
-<Navbar
-openLogin={openLogin}
-openSignup={openSignup}
-/>
-
-<Hero />
-
-{/* ABOUT */}
-
-<section
-id="about"
-className="section"
->
-
-<h2>About HirePoint</h2>
-
-<p>
-HirePoint is a modern hiring platform
-that helps users connect with skilled
-experts nearby based on location and
-professional skills.
-</p>
-
-</section>
-
-{/* FEATURES */}
-
-<section
-id="features"
-className="section"
->
-
-<h2>Features</h2>
-
-<div className="cards">
-
-<div className="card">
-<h3>JWT Authentication</h3>
-<p>Secure Login System</p>
-</div>
-
-<div className="card">
-<h3>Location Search</h3>
-<p>Find nearby experts easily</p>
-</div>
-
-<div className="card">
-<h3>CRUD Operations</h3>
-<p>Add Edit Delete Experts</p>
-</div>
-
-<div className="card">
-<h3>MongoDB Database</h3>
-<p>Stores users and experts</p>
-</div>
-
-</div>
-
-</section>
-
-{/* SEARCH */}
-
-<section className="section">
-
-<h2>Search Experts</h2>
-
-<input
-placeholder="Search by Location"
-value={search}
-onChange={(e)=>
-setSearch(e.target.value)
-}
-/>
-
-<button onClick={searchExpert}>
-Search
-</button>
-
-</section>
-
-{/* ADD EXPERT */}
-
-<section className="section">
-
-<h2>
-{
-editId
-?
-"Update Expert"
-:
-"Add Expert"
-}
-</h2>
-
-<ExpertForm
-name={name}
-skill={skill}
-location={location}
-setName={setName}
-setSkill={setSkill}
-setLocation={setLocation}
-saveExpert={saveExpert}
-editId={editId}
-/>
-
-</section>
-
-{/* DISPLAY */}
-
-<section className="section">
-
-<h2>Available Experts</h2>
-
-<ExpertList
-filtered={filtered}
-editExpert={editExpert}
-deleteExpert={deleteExpert}
-/>
-
-</section>
-
-{/* FOOTER */}
-
-<footer id="footer">
-
-<h2>HirePoint</h2>
-
-<p>
-Professional Expert Hiring Platform
-</p>
-
-</footer>
-
-{/* AUTH MODAL */}
-
-{
-showAuth && (
-
-<AuthModal
-type={type}
-close={close}
-validate={validate}
-setEmail={setEmail}
-setPassword={setPassword}
-/>
-
-)
-}
-
-</>
-
-);
-
+    </div>
+  );
 }
 
 export default App;
