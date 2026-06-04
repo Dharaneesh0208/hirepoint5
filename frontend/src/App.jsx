@@ -19,7 +19,7 @@ function App() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const API = "http://localhost:5000/api";
+  const API = "https://hirepoint-backend.onrender.com/api";
 
   useEffect(() => {
     fetchExperts();
