@@ -5,7 +5,7 @@ const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 
 dotenv.config();
-
+console.log(process.env.MONGO_URI);
 connectDB();
 
 const app = express();
@@ -20,6 +20,8 @@ app.get("/", (req, res) => {
   res.send("HirePoint API Running");
 });
 
-app.listen(process.env.PORT, () => {
-  console.log("Server Running");
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server Running on ${PORT}`);
 });
