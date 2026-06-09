@@ -10,6 +10,8 @@ function App() {
   const [name, setName] = useState("");
   const [skill, setSkill] = useState("");
   const [location, setLocation] = useState("");
+  const [expertEmail, setExpertEmail] = useState("");
+  const [phone, setPhone] = useState("");
 
   const [search, setSearch] = useState("");
 
@@ -38,16 +40,19 @@ function App() {
     }
 
     await axios.post(`${API}/experts`, {
-      name,
-      skill,
-      location
-    });
-
+     name,
+     skill,
+     location,
+     email: expertEmail,
+     phone
+});
     fetchExperts();
 
     setName("");
     setSkill("");
     setLocation("");
+    setExpertEmail("");
+    setPhone("");
   };
 
   const deleteExpert = async (id) => {
@@ -71,7 +76,7 @@ function App() {
       name,
       email,
       password
-    });
+});
 
     alert("Signup Successful");
     setShowSignup(false);
@@ -201,6 +206,19 @@ function App() {
           value={location}
           onChange={(e) => setLocation(e.target.value)}
         />
+        <input
+          type="email"
+          placeholder="Expert Email"
+          value={expertEmail}
+          onChange={(e) => setExpertEmail(e.target.value)}
+        />
+
+        <input
+          type="text"
+          placeholder="Phone Number"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+        />
 
         <button onClick={addExpert}>
           Add Expert
@@ -222,26 +240,35 @@ function App() {
 
       <section className="expertList">
 
-        {
-          filteredExperts.length === 0
-          ? <p>No Experts Found</p>
-          : filteredExperts.map((e) => (
+       {filteredExperts.map((expert) => (
+         <div className="expert-card" key={expert._id}>
+            <h3>{expert.name}</h3>
 
-            <div className="expertCard" key={e._id}>
+            <p>Skill: {expert.skill}</p>
 
-              <h3>{e.name}</h3>
+            <p>Location: {expert.location}</p>
 
-              <p>{e.skill}</p>
+            <a href={`mailto:${expert.email}`}>
+              <button>Email Expert</button>
+            </a>
 
-              <p>{e.location}</p>
+            <a href={`tel:${expert.phone}`}>
+              <button>Call Expert</button>
+            </a>
 
-              <button onClick={() => deleteExpert(e._id)}>
-                Delete
-              </button>
+            <a
+              href={`https://wa.me/91${expert.phone}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+             <button>WhatsApp Expert</button>
+            </a>
 
-            </div>
-          ))
-        }
+            <button onClick={() => deleteExpert(expert._id)}>
+              Delete
+            </button>
+          </div>
+))}
 
       </section>
 
