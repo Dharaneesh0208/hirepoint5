@@ -82,11 +82,11 @@ function App() {
     setShowSignup(false);
   };
 
-  const login = async () => {
-
-    if (!email.includes("@")) {
-      alert("Invalid Email");
-      return;
+    const login = async () => {
+     try {
+       if (!email.includes("@")) {
+         alert("Invalid Email");
+         return;
     }
 
     const res = await axios.post(`${API}/auth/login`, {
@@ -96,10 +96,18 @@ function App() {
 
     localStorage.setItem("token", res.data.token);
 
-    alert("Login Successful");
+      alert("Login Successful");
 
-    setShowLogin(false);
-  };
+      setShowLogin(false);  
+
+  } catch (error) {
+    console.log(error.response);
+
+    alert(
+      error.response?.data?.message || "Login Failed"
+    );
+  }
+};
 
   const filteredExperts = experts.filter((e) =>
     e.location.toLowerCase().includes(search.toLowerCase())
@@ -170,15 +178,15 @@ function App() {
           </div>
 
           <div className="card">
-            <h3>Secure Hiring</h3>
+            <h3>Find Experts</h3>
           </div>
 
           <div className="card">
-            <h3>Live Chat</h3>
+            <h3>Chat with Experts</h3>
           </div>
 
           <div className="card">
-            <h3>Project Tracking</h3>
+            <h3>Get Your Project Done</h3>
           </div>
 
         </div>
